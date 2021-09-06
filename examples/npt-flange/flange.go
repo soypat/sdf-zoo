@@ -8,36 +8,35 @@ import (
 	"github.com/deadsy/sdfx/sdf"
 )
 
+const (
+	// thread length
+	tlen             = 18 / 25.4
+	internalDiameter = 1.5 / 2.
+	flangeH          = 7 / 25.4
+	flangeD          = 60. / 25.4
+	thread           = "npt_1/2"
+	// internal diameter scaling.
+	plaScale = 1.03
+)
+
 func main() {
-	const (
-		tlen     = 15 / 25.4
-		shank    = 3 / 25.4
-		thread   = "npt_1/2"
-		svgStyle = "fill:none;stroke:black;stroke-width:.05"
-	)
-	bolt, err := obj.Bolt(&obj.BoltParms{Thread: thread, Style: "hex", TotalLength: tlen, ShankLength: shank})
+	pipe, err := ThreadedPipe(&obj.NutParms{Thread: thread, Style: "pipe"})
 	must(err)
-	bbz := bolt.BoundingBox().Size().Z
-	bbx := bolt.BoundingBox().Size().X
-	hollow, err := sdf.Cylinder3D(tlen+shank+8/25.4, bbx/3, 4/25.4)
-	hollow = sdf.Transform3D(hollow, sdf.Translate3d(sdf.V3{0, 0, bbz - tlen - 3/25.4}))
+	// PLA scaling to thread
+	pipe = sdf.Transform3D(pipe, sdf.Scale3d(sdf.V3{plaScale, plaScale, 1}))
+	flange, err := sdf.Cylinder3D(flangeH, flangeD/2, flangeH/8)
 	must(err)
-	bolt = sdf.Difference3D(bolt, hollow)
-	nut, err := NutPlug(&obj.NutParms{Thread: thread, Style: "hex"})
+	hole, err := sdf.Cylinder3D(flangeH, internalDiameter/2, 0)
 	must(err)
-	render.RenderSTLSlow(nut, 150, "npt_nut.stl")
-	render.RenderSTLSlow(bolt, 150, "npt_bolt.stl")
+	flange = sdf.Difference3D(flange, hole)
+	flange = sdf.Transform3D(flange, sdf.Translate3d(sdf.V3{0, 0, -tlen / 2}))
+	pipe = sdf.Union3D(pipe, flange)
+
+	render.RenderSTLSlow(pipe, 300, "npt_flange.stl")
+
 }
 
-// must asserts there is no error. if error encountered terminate program
-func must(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
-// Nut returns a simple nut suitable for 3d printing.
-func NutPlug(k *obj.NutParms) (sdf.SDF3, error) {
+func ThreadedPipe(k *obj.NutParms) (sdf.SDF3, error) {
 	// validate parameters
 	t, err := sdf.ThreadLookup(k.Thread)
 	if err != nil {
@@ -51,12 +50,14 @@ func NutPlug(k *obj.NutParms) (sdf.SDF3, error) {
 	var nut sdf.SDF3
 	nr := t.HexRadius()
 	nh := t.HexHeight()
-	plugExtraHeight := nh * 0.2
+	plugExtraHeight := 0.
 	switch k.Style {
 	case "hex":
 		nut, err = obj.HexHead3D(nr, nh+plugExtraHeight, "tb")
 	case "knurl":
 		nut, err = obj.KnurledHead3D(nr, nh+plugExtraHeight, nr*0.25)
+	case "pipe":
+		nut, err = sdf.Cylinder3D(nh+plugExtraHeight, nr*1.1, 0)
 	default:
 		return nil, sdf.ErrMsg(fmt.Sprintf("unknown style \"%s\"", k.Style))
 	}
@@ -75,4 +76,10 @@ func NutPlug(k *obj.NutParms) (sdf.SDF3, error) {
 	}
 
 	return sdf.Difference3D(nut, thread), nil
+}
+
+func must(err error) {
+	if err != nil {
+		panic(err)
+	}
 }
