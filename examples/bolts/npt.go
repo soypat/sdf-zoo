@@ -6,6 +6,7 @@ import (
 	"github.com/deadsy/sdfx/obj"
 	"github.com/deadsy/sdfx/render"
 	"github.com/deadsy/sdfx/sdf"
+	"github.com/soypat/sdf-zoo/helpers/correct"
 )
 
 func main() {
@@ -15,18 +16,19 @@ func main() {
 		thread   = "npt_1/2"
 		svgStyle = "fill:none;stroke:black;stroke-width:.05"
 	)
-	bolt, err := obj.Bolt(&obj.BoltParms{Thread: thread, Style: "hex", TotalLength: tlen, ShankLength: shank})
+	bolt, err := obj.Bolt(&obj.BoltParms{Thread: thread, Style: "knurl", TotalLength: tlen, ShankLength: shank})
 	must(err)
 	bbz := bolt.BoundingBox().Size().Z
 	bbx := bolt.BoundingBox().Size().X
-	hollow, err := sdf.Cylinder3D(tlen+shank+8/25.4, bbx/3, 4/25.4)
-	hollow = sdf.Transform3D(hollow, sdf.Translate3d(sdf.V3{0, 0, bbz - tlen - 3/25.4}))
+	hollow, err := sdf.Cylinder3D(tlen+shank, bbx/3.5, 3/25.4)
+	hollow = sdf.Transform3D(hollow, sdf.Translate3d(sdf.V3{0, 0, bbz - tlen/2 - shank/2}))
 	must(err)
 	bolt = sdf.Difference3D(bolt, hollow)
 	nut, err := NutPlug(&obj.NutParms{Thread: thread, Style: "hex"})
 	must(err)
-	render.RenderSTLSlow(nut, 150, "npt_nut.stl")
-	render.RenderSTLSlow(bolt, 150, "npt_bolt.stl")
+
+	render.RenderSTLSlow(correct.PLA.Scale(nut), 150, "npt_nut.stl")
+	render.RenderSTLSlow(correct.PLA.Scale(bolt), 150, "npt_bolt.stl")
 }
 
 // must asserts there is no error. if error encountered terminate program
