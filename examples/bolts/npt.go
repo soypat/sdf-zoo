@@ -11,24 +11,28 @@ import (
 
 func main() {
 	const (
-		tlen     = 15 / 25.4
-		shank    = 3 / 25.4
-		thread   = "npt_1/2"
-		svgStyle = "fill:none;stroke:black;stroke-width:.05"
+		mmPerInch = 25.4
+		tlen      = 15 / mmPerInch
+		shank     = 3 / mmPerInch
+		thread    = "npt_1/2"
+		svgStyle  = "fill:none;stroke:black;stroke-width:.05"
+		cells     = 200
 	)
 	bolt, err := obj.Bolt(&obj.BoltParms{Thread: thread, Style: "knurl", TotalLength: tlen, ShankLength: shank})
 	must(err)
 	bbz := bolt.BoundingBox().Size().Z
 	bbx := bolt.BoundingBox().Size().X
-	hollow, err := sdf.Cylinder3D(tlen+shank, bbx/3.5, 3/25.4)
+	hollow, err := sdf.Cylinder3D(tlen+shank, bbx/3.5, 3/mmPerInch)
 	hollow = sdf.Transform3D(hollow, sdf.Translate3d(sdf.V3{0, 0, bbz - tlen/2 - shank/2}))
 	must(err)
 	bolt = sdf.Difference3D(bolt, hollow)
 	nut, err := NutPlug(&obj.NutParms{Thread: thread, Style: "hex"})
 	must(err)
 
-	render.RenderSTLSlow(correct.PLA.Scale(nut), 150, "npt_nut.stl")
-	render.RenderSTLSlow(correct.PLA.Scale(bolt), 150, "npt_bolt.stl")
+	nut = sdf.ScaleUniform3D(nut, mmPerInch)
+	bolt = sdf.ScaleUniform3D(bolt, mmPerInch)
+	render.RenderSTLSlow(correct.PLA.Scale(nut), cells, "npt_nut.stl")
+	render.RenderSTLSlow(correct.PLA.Scale(bolt), cells, "npt_bolt.stl")
 }
 
 // must asserts there is no error. if error encountered terminate program
@@ -51,7 +55,7 @@ func NutPlug(k *obj.NutParms) (sdf.SDF3, error) {
 
 	// nut body
 	var nut sdf.SDF3
-	nr := t.HexRadius()
+	nr := t.HexRadius() * 1.1
 	nh := t.HexHeight()
 	plugExtraHeight := nh * 0.2
 	switch k.Style {

@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"sdftest/helpers/hio"
-	"sdftest/helpers/spacing"
+
+	"github.com/soypat/sdf-zoo/helpers/hio"
+	"github.com/soypat/sdf-zoo/helpers/spacing"
 
 	"github.com/deadsy/sdfx/render"
 	"github.com/deadsy/sdfx/sdf"
