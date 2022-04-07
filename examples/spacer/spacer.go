@@ -8,6 +8,7 @@ import (
 
 func main() {
 	holeDiam := 5.0 // mm
+
 	ftfDiam := holeDiam * 1.8
 	spacerHeight := 27.0 // mm
 	sp, err := obj.HexHead3D(ftfDiam/2, spacerHeight, "")

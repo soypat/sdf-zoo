@@ -14,8 +14,7 @@ func main() {
 		mmPerInch = 25.4
 		tlen      = 15 / mmPerInch
 		shank     = 3 / mmPerInch
-		thread    = "npt_1/2"
-		svgStyle  = "fill:none;stroke:black;stroke-width:.05"
+		thread    = "npt_3/4"
 		cells     = 200
 	)
 	bolt, err := obj.Bolt(&obj.BoltParms{Thread: thread, Style: "knurl", TotalLength: tlen, ShankLength: shank})
