@@ -3,7 +3,7 @@ package correct
 import "github.com/deadsy/sdfx/sdf"
 
 var (
-	PLA = Material{shrink: 0.2e-2,internalShrink: .7} // 0.2% shrinkage
+	PLA = Material{shrink: 0.2e-2, internalShrink: .7} // 0.2% shrinkage
 )
 
 type Material struct {
@@ -18,5 +18,5 @@ func (m Material) Scale(s sdf.SDF3) sdf.SDF3 {
 }
 
 func (m Material) InternalDimScale(real float64) float64 {
-	return real+
+	return real*(m.shrink+1) + .45
 }
