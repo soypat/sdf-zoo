@@ -17,7 +17,7 @@ func main() {
 		connectorDim float64 = 15.6
 		// Cover dimensions
 		coverThick   float64 = 2 * nozzleDiam
-		coverProtude float64 = 2
+		coverProtude float64 = 3
 		round                = coverThick / 2
 	)
 	var dim float64
@@ -32,16 +32,21 @@ func main() {
 	cover = sdf.Difference3D(cover, empty)
 
 	// We now create sensor-facing part
-	sensorCover, err := sdf.Cylinder3D(coverProtude+coverThick, connectorDim/2+coverThick, round)
+	sensorCover, err := sdf.Cylinder3D(coverProtude+coverThick, adzDiam/2+coverThick, round)
 	must(err)
-	dim = material.InternalDimScale(connectorDim / 2)
+	dim = material.InternalDimScale(adzDiam / 2)
 	empty, err = sdf.Cylinder3D(coverProtude*2, dim, round)
-	empty = sdf.Transform3D(empty, sdf.Translate3d(sdf.V3{Z: -coverProtude / 2}))
+	empty = sdf.Transform3D(empty, sdf.Translate3d(sdf.V3{Z: -coverProtude}))
 	sensorCover = sdf.Difference3D(sensorCover, empty)
 	sensorCover = sdf.Transform3D(sensorCover, sdf.Translate3d(sdf.V3{Z: -coverProtude}))
-
 	cover = sdf.Union3D(cover, sensorCover)
-	cover = sdf.Difference3D(cover, empty)
+
+	// Make hole for connector pins.
+	dim = 10
+	hole, err := sdf.Box3D(sdf.V3{X: dim, Y: dim, Z: 4 * coverThick}, 0)
+	must(err)
+	hole = sdf.Transform3D(hole, sdf.Translate3d(sdf.V3{Z: -2 * coverThick}))
+	cover = sdf.Difference3D(cover, hole)
 	cover = material.Scale(cover)
 	render.RenderSTLSlow(cover, 250, fmt.Sprintf("cover.stl"))
 }
