@@ -11,8 +11,8 @@ import (
 
 func main() {
 	const (
-		spacerHeight     float64 = 5 // mm
-		holeDiam         float64 = 3 // mm
+		spacerHeight     float64 = 31 // mm
+		holeDiam         float64 = 4  // mm
 		plaHoleCorrected         = holeDiam*1.05 + .4
 	)
 	ftf := math.Ceil(plaHoleCorrected*1.4) - .15 // Face to face hex distance
