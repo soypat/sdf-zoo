@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+	// For PLT connectors (microphone connector)
 	material := correct.PLA
 	const (
 		panelHoleD      float64 = 16
