@@ -52,12 +52,12 @@ func base() sdf.SDF3 {
 	// standoffs
 	zOfs := 0.5 * (pillarHeight + baseThickness)
 	m4Positions := sdf.V3Set{
-		{4.5, 4.5, zOfs},
-		{4.5, 95.5, zOfs},
-		{95.5, 95.5, zOfs},
-		{95.5, 4.5, zOfs},
+		// Regular board spacing
+		{4.5, 4.5, zOfs}, {4.5, 95.5, zOfs}, {95.5, 95.5, zOfs}, {95.5, 4.5, zOfs},
 		{60, 30, zOfs},
 		{60, 70, zOfs},
+		// {40, 50, zOfs},
+		// {60, 50, zOfs},
 	}
 	m4Standoffs := standoffs(4, m4Positions)
 	m3Positions := sdf.V3Set{
@@ -65,6 +65,8 @@ func base() sdf.SDF3 {
 		{9, 62.5, zOfs},
 		{91, 64.5, zOfs},
 		{91, 37.5, zOfs},
+		{35.5, 91, zOfs},
+		{62.5, 91, zOfs},
 	}
 	m3Standoffs := standoffs(3, m3Positions)
 	s4 := sdf.Union3D(s2, m4Standoffs, m3Standoffs)
